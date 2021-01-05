@@ -8,35 +8,45 @@ from urllib import parse
 
 import muggle_ocr
 import requests
+import urllib3
 
 import MessageSender
 
+useVpn = False
+VPNUsername = ""
+VPNPassword = ""
 username = ""
 password = ""
+baseURL = "https://uims.jlu.edu.cn/"
+baseURL_VPN = "https://vpns.jlu.edu.cn/https/77726476706e69737468656265737421e5fe4c8f693a6445300d8db9d6562d/"
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-    'Origin': 'https://uims.jlu.edu.cn',
-    'Host': 'uims.jlu.edu.cn',
-    'referer': 'https://uims.jlu.edu.cn/ntms/userLogin.jsp?reason=logout',
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Connection': 'Keep-Alive',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-    'Upgrade-Insecure-Requests': '1'
+    'Content-Type': 'application/x-www-form-urlencoded'
 }
 jsonHeaders = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-    'Origin': 'https://uims.jlu.edu.cn',
-    'Host': 'uims.jlu.edu.cn',
-    'referer': 'https://uims.jlu.edu.cn/ntms/userLogin.jsp?reason=logout',
-    'Content-Type': 'application/json',
-    'Connection': 'Keep-Alive',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-    'Upgrade-Insecure-Requests': '1'
+    'Content-Type': 'application/json'
 }
 maxPredict = 5
 delayTime = 5 * 60
 m = MessageSender.MessageSender("bark")
 m.config({"apikey": ""})
+
+
+def VPNLogin(vusr, vpwd):
+    global s, baseURL, baseURL_VPN, headers, jsonHeaders
+    baseURL = baseURL_VPN
+    s.headers.update(headers)
+    s.verify = False
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    warning("VPN登录！")
+    postPayload = {
+        'auth_type': 'local',
+        'sms_code': '',
+        'username': vusr,
+        'password': vpwd
+    }
+    s.post('https://vpns.jlu.edu.cn/do-login?local_login=true', data=postPayload)
 
 
 def getCaptchaCode(img):
@@ -55,14 +65,17 @@ def getCaptchaCode(img):
 
 
 def login(username, password, times):
-    global s
+    global s, VPNUsername, VPNPassword
+    if useVpn:
+        VPNLogin(VPNUsername, VPNPassword)
     if times >= 10:
         error("重试次数过多！可能是代码或网络出现问题，退出！")
         quit()
     s.headers.update(headers)
     try:
-        a = s.get("https://uims.jlu.edu.cn/ntms/open/get-captcha-image.do?s={}".format(random.randint(1, 65535)),
+        a = s.get("{}ntms/open/get-captcha-image.do?s={}".format(baseURL, random.randint(1, 65535)),
                   timeout=2).content
+        debug(a)
     except:
         login(username, password, times + 1)
     else:
@@ -76,7 +89,7 @@ def login(username, password, times):
             'vcode': str(captchaCode)
         }
         loginData = parse.urlencode(loginData).encode('utf-8')
-        res = s.post(url="https://uims.jlu.edu.cn/ntms/j_spring_security_check", data=loginData).content.decode()
+        res = s.post(url="{}ntms/j_spring_security_check".format(baseURL), data=loginData).content.decode()
         if '登录错误' in res:
             error("登录错误，重试！")
             login(username, password, times + 1)
@@ -92,7 +105,7 @@ def getScoreDict():
         "tag": "archiveScore@queryCourseScore",
         "branch": "latest"
     }
-    res = s.post(url="https://uims.jlu.edu.cn/ntms/service/res.do", data=json.dumps(postData)).content.decode()
+    res = s.post(url="{}ntms/service/res.do".format(baseURL), data=json.dumps(postData)).content.decode()
     rtnData = json.loads(res)
     debug(rtnData)
     return rtnData
@@ -101,7 +114,7 @@ def getScoreDict():
 def getScoreStateDict(idName, courseID):
     global s
     s.headers.update(jsonHeaders)
-    url = "https://uims.jlu.edu.cn/ntms/score/course-score-stat.do"
+    url = "{}ntms/score/course-score-stat.do".format(baseURL)
     postData = {
         idName: courseID
     }
@@ -110,9 +123,8 @@ def getScoreStateDict(idName, courseID):
     return rtnData
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-warning('Started.')
-
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+warning('开始。')
 sdk = muggle_ocr.SDK(model_type=muggle_ocr.ModelType.Captcha)
 s = requests.session()
 try:
