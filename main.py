@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import time
 from hashlib import md5
 from logging import *
@@ -55,27 +56,33 @@ def getCaptchaCode(img):
 
 def login(username, password, times):
     global s
-    if times >= 20:
+    if times >= 10:
         error("重试次数过多！可能是代码或网络出现问题，退出！")
         quit()
     s.headers.update(headers)
-    a = s.get("https://uims.jlu.edu.cn/ntms/open/get-captcha-image.do?s=1").content
-    captchaCode = getCaptchaCode(a)
-    passwordMD5 = md5(('UIMS' + username + password).encode('utf-8')).hexdigest()
-    loginData = {
-        'username': username,
-        'password': passwordMD5,
-        'mousePath': "",
-        'vcode': str(captchaCode)
-    }
-    loginData = parse.urlencode(loginData).encode('utf-8')
-    res = s.post(url="https://uims.jlu.edu.cn/ntms/j_spring_security_check", data=loginData).content.decode()
-    if '登录错误' in res:
-        error("登录错误，重试！")
+    try:
+        a = s.get("https://uims.jlu.edu.cn/ntms/open/get-captcha-image.do?s={}".format(random.randint(1, 65535)),
+                  timeout=2).content
+    except:
         login(username, password, times + 1)
     else:
-        warning("登录成功！")
-        return
+        captchaCode = getCaptchaCode(a)
+        debug(captchaCode)
+        passwordMD5 = md5(('UIMS' + username + password).encode('utf-8')).hexdigest()
+        loginData = {
+            'username': username,
+            'password': passwordMD5,
+            'mousePath': "",
+            'vcode': str(captchaCode)
+        }
+        loginData = parse.urlencode(loginData).encode('utf-8')
+        res = s.post(url="https://uims.jlu.edu.cn/ntms/j_spring_security_check", data=loginData).content.decode()
+        if '登录错误' in res:
+            error("登录错误，重试！")
+            login(username, password, times + 1)
+        else:
+            warning("登录成功！")
+            return
 
 
 def getScoreDict():
@@ -117,8 +124,9 @@ except:
     posted = []
 while True:
     try:
-        asId = getScoreDict()['id']
-        posts = getScoreDict()['value']
+        scoreDict = getScoreDict()
+        asId = scoreDict['id']
+        posts = scoreDict['value']
         for pid in posts:
             if pid in posted: continue
             info("新成绩！{}".format(pid))
