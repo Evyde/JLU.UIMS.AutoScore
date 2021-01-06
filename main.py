@@ -19,12 +19,14 @@ username = ""
 password = ""
 baseURL = "https://uims.jlu.edu.cn/"
 baseURL_VPN = "https://vpns.jlu.edu.cn/https/77726476706e69737468656265737421e5fe4c8f693a6445300d8db9d6562d/"
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 " \
+     "Safari/537.36 "
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+    'User-Agent': UA,
     'Content-Type': 'application/x-www-form-urlencoded'
 }
 jsonHeaders = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+    'User-Agent': UA,
     'Content-Type': 'application/json'
 }
 maxPredict = 5
@@ -123,7 +125,7 @@ def getScoreStateDict(idName, courseID):
     return rtnData
 
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 warning('开始。')
 sdk = muggle_ocr.SDK(model_type=muggle_ocr.ModelType.Captcha)
 s = requests.session()

@@ -38,12 +38,12 @@ $ sudo -H pip3 install tensorflow-2.4.0-cp37-none-linux_armv7l.whl
     jsonHeaders['Origin'] = "https://vpns.jlu.edu.cn"
     jsonHeaders['referer'] = "https://vpns.jlu.edu.cn/do-login?local_login=true"
 ```
-- 由于使用了炼丹来识别验证码，程序占用内存非常大，大约为200M，并且在i5-9400F上占用大概70%的CPU。尝试使用`del`关键字但是并没有用，是tensorflow的问题，但是暂时没有很好的解决办法。
+- 由于使用了炼丹来识别验证码，程序占用内存非常大，大约为200M，并且在i5-9400F上占用大概70%的CPU。尝试使用`del`关键字但是并没有用，是tensorflow的问题，~~但是暂时没有很好的解决办法~~可以尝试使用百度OCR等进行识别。
 - 炼丹识别验证码有时候会卡住，需要手动重启程序。  
 
 ## 待办事项
-- [ ] 多线程多用户轮训
-- [ ] 多线程识别验证码，当等待时间过长时自动重启线程
+- [ ] ~~多线程多用户轮训~~不太好解决Session缓存和管理的问题~~（我懒）~~
+- [ ] ~~多线程识别验证码，当等待时间过长时自动重启线程~~（Python获得线程返回值必须override Thread类，或者可以使用全局变量（list等是线程安全的），但是我不想用，因为这样有可能会对第一个待办事项造成麻烦，而且等待线程返回结果这件事本身就有点**）
 
 ## 特别感谢
 [@TechCiel](https://github.com/TechCiel) 的 [Reachee](https://github.com/TechCiel/Reachee) 中的大部分代码，故本代码协议与其相同。
