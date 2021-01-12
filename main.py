@@ -138,6 +138,7 @@ except:
     posted = []
 while True:
     try:
+        info("获取成绩...")
         scoreDict = getScoreDict()
         asId = scoreDict['id']
         posts = scoreDict['value']
