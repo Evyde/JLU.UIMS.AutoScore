@@ -2,3 +2,4 @@ venv
 .idea
 config.ini
 .reachee_uims_autoscore
+test.py

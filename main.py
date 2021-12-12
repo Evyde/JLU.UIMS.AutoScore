@@ -151,6 +151,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 warning('开始。')
 sdk = muggle_ocr.SDK(model_type=muggle_ocr.ModelType.Captcha)
 s = requests.session()
+firstLogin = True
 try:
     with open(cfg.get("API", "Prefix"), 'r') as f:
         posted = eval(f.read())
@@ -160,6 +161,10 @@ except:
     posted = []
 while True:
     try:
+        if firstLogin:
+            warning("首次登陆！")
+            firstLogin = False
+            raise Exception()
         info("获取成绩...")
         scoreDict = getScoreDict()
         asId = scoreDict['id']
@@ -171,7 +176,7 @@ while True:
             ranks = getScoreStateDict(asId, pid[asId])['items']
             sendData = {
                 "title": "{} 成绩已出！".format(pid['course']['courName']),
-                "content": "{}分,绩点{}.班级{}占{},{}占{},{}占{},{}占{},{}占{}".format(
+                "content": "{}分,绩点{}.班级{}占{}%,{}占{}%,{}占{}%,{}占{}%,{}占{}%".format(
                     pid['score'], pid['gpoint'], ranks[0]['label'], round(float(ranks[0]['percent']), 1),
                     ranks[1]['label'], round(float(ranks[1]['percent']), 1),
                     ranks[2]['label'], round(float(ranks[2]['percent']), 1),
@@ -179,14 +184,15 @@ while True:
                     ranks[4]['label'], round(float(ranks[4]['percent']), 1),
                 )
             }
-            m.send(sendData)
-            info(sendData)
+            info("推送通知 - {}".format(m.send(sendData)))
             posted.append(pid)
             try:
+                info("写入文件")
                 with open(cfg.get("API", "Prefix"), 'w') as f:
                     f.write(repr(posted))
             except:
                 error('无法写入文件！')
+        warning("休息 {} 秒".format(delayTime))
         time.sleep(delayTime)
 
     except:
