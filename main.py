@@ -31,7 +31,7 @@ pushMethod = "bark"
 pushConfig = {"apikey": ""}
 
 if "Default" in cfg and "API" in cfg:
-    useVpn = cfg.getboolean("API", "UseVPN")
+    useVpn = cfg.getboolean("Default", "UseVPN")
     VPNUsername = cfg.get("Default", "VPNUsername")
     VPNPassword = cfg.get("Default", "VPNPassword")
     username = cfg.get("Default", "UserName")
