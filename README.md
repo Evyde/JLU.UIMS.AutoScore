@@ -1,4 +1,7 @@
 # JLU_Uims_AutoScore
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5478fca064ba4f48b65a5becb103c769)](https://app.codacy.com/gh/ForeverOpp/JLU_Uims_AutoScore?utm_source=github.com&utm_medium=referral&utm_content=ForeverOpp/JLU_Uims_AutoScore&utm_campaign=Badge_Grade_Settings)
+
 自动查成绩，好耶！  
 ## 使用方法
 更改`config.example.ini`中`Default`字段的配置项，然后重命名为`config.ini`。
