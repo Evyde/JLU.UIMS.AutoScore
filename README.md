@@ -1,8 +1,8 @@
 # JLU_Uims_AutoScore
 自动查成绩，好耶！  
 ## 使用方法
-先更改`main.py`中`username`和`password`字段改成自己的`uims`系统中的用户名和密码，然后修改`m.config`这一行，改成您喜欢的推送方式并按照代码传入正确的字典。  
-默认不开启VPN登陆，请修改`useVpn`为`True`并输入自己的用户名和密码。  
+更改`config.example.ini`中`Default`字段的配置项，然后重命名为`config.ini`。
+
 最后：  
 `pip install -r requirements.txt`  
 `python3 main.py`  

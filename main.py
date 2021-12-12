@@ -9,8 +9,12 @@ from urllib import parse
 import muggle_ocr
 import requests
 import urllib3
+import configparser
 
 import MessageSender
+
+cfg = configparser.ConfigParser()
+cfg.read("config.ini")
 
 useVpn = False
 VPNUsername = ""
@@ -20,7 +24,29 @@ password = ""
 baseURL = "https://uims.jlu.edu.cn/"
 baseURL_VPN = "https://vpns.jlu.edu.cn/https/77726476706e69737468656265737421e5fe4c8f693a6445300d8db9d6562d/"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 " \
-     "Safari/537.36 "
+     "Safari/537.36"
+maxPredict = 5
+delayTime = 5 * 60
+pushMethod = "bark"
+pushConfig = {"apikey": ""}
+
+if "Default" in cfg and "API" in cfg:
+    useVpn = cfg.getboolean("API", "UseVPN")
+    VPNUsername = cfg.get("Default", "VPNUsername")
+    VPNPassword = cfg.get("Default", "VPNPassword")
+    username = cfg.get("Default", "UserName")
+    password = cfg.get("Default", "Password")
+    baseURL = cfg.get("API", "BaseURL")
+    baseURL_VPN = cfg.get("API", "BaseURL_VPN")
+    UA = cfg.get("Default", "UA")
+    maxPredict = cfg.getint("Default", "MaxPredict")
+    delayTime = cfg.getint("Default", "DelayTime")
+    pushMethod = cfg.get("Default", "PushMethod")
+    pushConfig = json.loads(cfg.get("Default", "PushConfig"))
+
+m = MessageSender.MessageSender(pushMethod)
+m.config(pushConfig)
+
 headers = {
     'User-Agent': UA,
     'Content-Type': 'application/x-www-form-urlencoded'
@@ -29,10 +55,6 @@ jsonHeaders = {
     'User-Agent': UA,
     'Content-Type': 'application/json'
 }
-maxPredict = 5
-delayTime = 5 * 60
-m = MessageSender.MessageSender("bark")
-m.config({"apikey": ""})
 
 
 def VPNLogin(vusr, vpwd):
@@ -48,7 +70,7 @@ def VPNLogin(vusr, vpwd):
         'username': vusr,
         'password': vpwd
     }
-    s.post('https://vpns.jlu.edu.cn/do-login?local_login=true', data=postPayload)
+    s.post(cfg.get("API", "VPNLogin"), data=postPayload)
 
 
 def getCaptchaCode(img):
@@ -67,7 +89,7 @@ def getCaptchaCode(img):
 
 
 def login(username, password, times):
-    global s, VPNUsername, VPNPassword
+    global s, VPNUsername, VPNPassword, cfg
     if useVpn:
         VPNLogin(VPNUsername, VPNPassword)
     if times >= 10:
@@ -75,7 +97,7 @@ def login(username, password, times):
         quit()
     s.headers.update(headers)
     try:
-        a = s.get("{}ntms/open/get-captcha-image.do?s={}".format(baseURL, random.randint(1, 65535)),
+        a = s.get("{}{}?s={}".format(baseURL, cfg.get("API", "LoginCaptcha"), random.randint(1, 65535)),
                   timeout=2).content
         debug(a)
     except:
@@ -91,7 +113,7 @@ def login(username, password, times):
             'vcode': str(captchaCode)
         }
         loginData = parse.urlencode(loginData).encode('utf-8')
-        res = s.post(url="{}ntms/j_spring_security_check".format(baseURL), data=loginData).content.decode()
+        res = s.post(url="{}{}".format(baseURL, cfg.get("API", "Login")), data=loginData).content.decode()
         if '登录错误' in res:
             error("登录错误，重试！")
             login(username, password, times + 1)
@@ -107,7 +129,7 @@ def getScoreDict():
         "tag": "archiveScore@queryCourseScore",
         "branch": "latest"
     }
-    res = s.post(url="{}ntms/service/res.do".format(baseURL), data=json.dumps(postData)).content.decode()
+    res = s.post(url="{}{}".format(baseURL, cfg.get("API", "Score")), data=json.dumps(postData)).content.decode()
     rtnData = json.loads(res)
     debug(rtnData)
     return rtnData
@@ -116,7 +138,7 @@ def getScoreDict():
 def getScoreStateDict(idName, courseID):
     global s
     s.headers.update(jsonHeaders)
-    url = "{}ntms/score/course-score-stat.do".format(baseURL)
+    url = "{}{}".format(baseURL, cfg.get("API", "ScoreState"))
     postData = {
         idName: courseID
     }
@@ -130,7 +152,7 @@ warning('开始。')
 sdk = muggle_ocr.SDK(model_type=muggle_ocr.ModelType.Captcha)
 s = requests.session()
 try:
-    with open('.reachee_uims_autoscore', 'r') as f:
+    with open(cfg.get("API", "Prefix"), 'r') as f:
         posted = eval(f.read())
     if not isinstance(posted, list): raise Exception
 except:
@@ -161,7 +183,7 @@ while True:
             info(sendData)
             posted.append(pid)
             try:
-                with open('.reachee_uims_autoscore', 'w') as f:
+                with open(cfg.get("API", "Prefix"), 'w') as f:
                     f.write(repr(posted))
             except:
                 error('无法写入文件！')
