@@ -196,6 +196,8 @@ while True:
                     info("写入成功")
             except:
                 error('无法写入文件！')
+        else:
+            info("没有新成绩")
         info("休息 {} 秒".format(delayTime))
         time.sleep(delayTime)
 
