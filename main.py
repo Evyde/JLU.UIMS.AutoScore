@@ -85,7 +85,7 @@ def getCaptchaCode(img):
         for key in captchas:
             captchasDict[key] = captchasDict.get(key, 0) + 1
         captchasDictOrder = sorted(captchasDict.items(), key=lambda x: x[1], reverse=True)
-        return int(captchasDictOrder[0][0])
+        return captchasDictOrder[0][0]
     except:
         return getCaptchaCode(img)
 
