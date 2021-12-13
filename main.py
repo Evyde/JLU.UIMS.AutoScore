@@ -71,10 +71,12 @@ def VPNLogin(vusr, vpwd):
         'password': vpwd
     }
     s.post(cfg.get("API", "VPNLogin"), data=postPayload)
+    warning("VPN登录完成")
 
 
 def getCaptchaCode(img):
     global sdk
+    info("识别验证码")
     try:
         captchas = []
         for i in range(5):
@@ -96,6 +98,7 @@ def login(username, password, times):
         error("重试次数过多！可能是代码或网络出现问题，退出！")
         quit()
     s.headers.update(headers)
+    info("开始登录")
     try:
         a = s.get("{}{}?s={}".format(baseURL, cfg.get("API", "LoginCaptcha"), random.randint(1, 65535)),
                   timeout=2).content
@@ -147,7 +150,7 @@ def getScoreStateDict(idName, courseID):
     return rtnData
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(level=cfg.get("Default", "Log"), format='%(asctime)s %(levelname)s %(message)s')
 warning('开始。')
 sdk = muggle_ocr.SDK(model_type=muggle_ocr.ModelType.Captcha)
 s = requests.session()
