@@ -107,7 +107,7 @@ def login(username, password, times):
         login(username, password, times + 1)
     else:
         captchaCode = getCaptchaCode(a)
-        warning("验证码：".format(captchaCode))
+        warning("验证码：{}".format(captchaCode))
         passwordMD5 = md5(('UIMS' + username + password).encode('utf-8')).hexdigest()
         loginData = {
             'username': username,
