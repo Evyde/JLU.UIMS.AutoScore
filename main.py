@@ -76,7 +76,7 @@ def VPNLogin(vusr, vpwd):
 
 def getCaptchaCode(img):
     global sdk
-    info("识别验证码")
+    info("开始识别验证码")
     try:
         captchas = []
         for i in range(5):
@@ -98,7 +98,7 @@ def login(username, password, times):
         error("重试次数过多！可能是代码或网络出现问题，退出！")
         quit()
     s.headers.update(headers)
-    info("开始登录")
+    info("开始登录 - 第 {} 次".format(times + 1))
     try:
         a = s.get("{}{}?s={}".format(baseURL, cfg.get("API", "LoginCaptcha"), random.randint(1, 65535)),
                   timeout=2).content
@@ -107,7 +107,7 @@ def login(username, password, times):
         login(username, password, times + 1)
     else:
         captchaCode = getCaptchaCode(a)
-        debug(captchaCode)
+        warning("验证码：".format(captchaCode))
         passwordMD5 = md5(('UIMS' + username + password).encode('utf-8')).hexdigest()
         loginData = {
             'username': username,
