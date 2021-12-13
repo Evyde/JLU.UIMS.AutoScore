@@ -71,7 +71,7 @@ def VPNLogin(vusr, vpwd):
         'password': vpwd
     }
     s.post(cfg.get("API", "VPNLogin"), data=postPayload)
-    warning("VPN登录完成")
+    info("VPN登录完成")
 
 
 def getCaptchaCode(img):
@@ -107,7 +107,7 @@ def login(username, password, times):
         login(username, password, times + 1)
     else:
         captchaCode = getCaptchaCode(a)
-        warning("验证码：{}".format(captchaCode))
+        info("验证码：{}".format(captchaCode))
         passwordMD5 = md5(('UIMS' + username + password).encode('utf-8')).hexdigest()
         loginData = {
             'username': username,
@@ -174,7 +174,7 @@ while True:
         posts = scoreDict['value']
         for pid in posts:
             if pid in posted: continue
-            info("新成绩！{}".format(pid))
+            warning("新成绩！{} - {}分".format(pid['course']['courName'], pid['score']))
             info("获取排名...")
             ranks = getScoreStateDict(asId, pid[asId])['items']
             sendData = {
@@ -193,9 +193,10 @@ while True:
                 info("写入文件")
                 with open(cfg.get("API", "Prefix"), 'w') as f:
                     f.write(repr(posted))
+                    info("写入成功")
             except:
                 error('无法写入文件！')
-        warning("休息 {} 秒".format(delayTime))
+        info("休息 {} 秒".format(delayTime))
         time.sleep(delayTime)
 
     except:
