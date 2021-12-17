@@ -165,7 +165,7 @@ except:
 while True:
     try:
         if firstLogin:
-            warning("首次登陆！")
+            warning("首次登录！")
             firstLogin = False
             raise Exception()
         info("获取成绩...")
@@ -202,5 +202,6 @@ while True:
         time.sleep(delayTime)
 
     except:
+        warning("重新登录")
         login(username, password, 0)
         continue
