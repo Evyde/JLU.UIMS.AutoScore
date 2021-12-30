@@ -100,7 +100,7 @@ def login(username, password, times):
     s.headers.update(headers)
     info("用户 {} 开始登录 - 第 {} 次".format(username, times + 1))
     try:
-        a = s.get("{}{}?s={}".format(baseURL, cfg.get("API", "LoginCaptcha"), random.randint(1, 65535)),
+        a = s.get("{}{}?s={}".format(baseURL, cfg.get("API", "LoginCaptcha"), round(random.uniform(0, 1), 16)),
                   timeout=2).content
         debug(a)
     except:
