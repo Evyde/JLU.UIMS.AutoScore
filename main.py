@@ -5,6 +5,7 @@ import time
 from hashlib import md5
 from logging import *
 from urllib import parse
+from Crypto.Cipher import AES
 
 import muggle_ocr
 import requests
@@ -29,6 +30,10 @@ maxPredict = 5
 delayTime = 5 * 60
 pushMethod = "bark"
 pushConfig = {"apikey": ""}
+key = "wrdvpnisawesome!"
+iv = "wrdvpnisawesome!"
+BLOCK_SIZE = 16  # Bytes
+pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * '\0'
 
 if "Default" in cfg and "API" in cfg:
     useVpn = cfg.getboolean("Default", "UseVPN")
@@ -43,6 +48,8 @@ if "Default" in cfg and "API" in cfg:
     delayTime = cfg.getint("Default", "DelayTime")
     pushMethod = cfg.get("Default", "PushMethod")
     pushConfig = json.loads(cfg.get("Default", "PushConfig"))
+    key = cfg.get("API", "Key")
+    iv = cfg.get("API", "Key")
 
 m = MessageSender.MessageSender(pushMethod)
 m.config(pushConfig)
@@ -57,8 +64,18 @@ jsonHeaders = {
 }
 
 
+def aesEncrypt(key, iv, data):
+    key = key.encode('utf8')
+    iv = iv.encode('utf-8')
+    # data = pad(data)
+    cipher = AES.new(key, AES.MODE_OFB, iv=iv)
+    result = cipher.encrypt(data.encode('utf-8'))
+    enctext = result.hex()
+    return iv.hex() + enctext
+
+
 def VPNLogin(vusr, vpwd):
-    global s, baseURL, baseURL_VPN, headers, jsonHeaders
+    global s, baseURL, baseURL_VPN, headers, jsonHeaders, key, iv
     baseURL = baseURL_VPN
     s.headers.update(headers)
     s.verify = False
@@ -68,7 +85,7 @@ def VPNLogin(vusr, vpwd):
         'auth_type': 'local',
         'sms_code': '',
         'username': vusr,
-        'password': vpwd
+        'password': aesEncrypt(key, iv, vpwd)
     }
     s.post(cfg.get("API", "VPNLogin"), data=postPayload)
     info("VPN登录完成")
