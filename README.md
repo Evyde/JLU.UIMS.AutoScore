@@ -63,4 +63,4 @@ $ sudo -H pip3 install tensorflow-2.4.0-cp37-none-linux_armv7l.whl
 - [ ] 更换专用模型，至少也得用谷歌的手写数字预训练模型，目前程序识别失败的原因纯纯是识别成字母了
 
 ## 特别感谢
-[@TechCiel](https://github.com/TechCiel) 的 [Reachee](https://github.com/TechCiel/Reachee) 中的大部分代码，故本代码协议与其相同。
+[@TechCiel](https://github.com/TechCiel) 的 [Reachee](https://github.com/TechCiel/Reachee) 中的大部分代码。
