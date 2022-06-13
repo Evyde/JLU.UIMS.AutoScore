@@ -85,7 +85,7 @@ def VPNLogin(vusr, vpwd):
         'auth_type': 'local',
         'sms_code': '',
         'username': vusr,
-        'password': aesEncrypt(key, iv, vpwd)
+        'password': vpwd # aesEncrypt(key, iv, vpwd)
     }
     s.post(cfg.get("API", "VPNLogin"), data=postPayload)
     info("VPN登录完成")
