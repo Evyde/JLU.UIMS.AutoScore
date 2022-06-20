@@ -23,7 +23,8 @@ class MessageSender(object):
             "bark": BarkSender,
             "smtp": SMTPSender,
             "console": ConsoleSender,
-            "mirai": MiraiHTTPApiSender
+            "mirai_webhook": MiraiHTTPApiWebhookSender,
+            "mirai_http": MiraiHTTPApiHTTPSender
         }
         if self.initFlag is False:
             self.__method = str(method)
@@ -114,7 +115,7 @@ class BarkSender(object):
         return "发送状态：" + str(requests.get(url))
 
 
-class MiraiHTTPApiSender(object):
+class MiraiHTTPApiWebhookSender(object):
     _mah_friend_webhook = "localhost:9999/send"
     _mah_group_webhook = "localhost:9999/send"
 
@@ -136,3 +137,14 @@ class MiraiHTTPApiSender(object):
 
     def __send_to_friend(self, msg: str):
         return requests.post(self._mah_friend_webhook, data=msg).text
+
+
+class MiraiHTTPApiHTTPSender(object):
+    _entrypoint = "localhost:8080"
+
+    def __init__(self, config: dict):
+        if config.get("entrypoint") is not None:
+            self._entrypoint = config["entrypoint"]
+
+    def send(self, msg: dict):
+        return requests.post(self._entrypoint, data=msg).text
