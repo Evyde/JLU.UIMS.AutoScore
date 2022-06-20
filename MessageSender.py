@@ -32,7 +32,7 @@ class MessageSender(object):
         self.initFlag = True
 
     def config(self, config):
-        if self.__method in self.__methods:
+        if self.__method in self.__methods.keys():
             self.__sender = self.__methods[self.__method](config)
         else:
             raise Exception("Configure Exception")
@@ -140,7 +140,7 @@ class MiraiHTTPApiWebhookSender(object):
 
 
 class MiraiHTTPApiHTTPSender(object):
-    _entrypoint = "localhost:8080"
+    _entrypoint = "http://localhost:8080"
 
     def __init__(self, config: dict):
         if config.get("entrypoint") is not None:
