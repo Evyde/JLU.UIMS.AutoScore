@@ -18,20 +18,21 @@ class MessageSender(object):
         return cls.__obj
 
     def __init__(self, method):
+        self.__methods = {
+            "server_chan": ServerChanSender,
+            "bark": BarkSender,
+            "smtp": SMTPSender,
+            "console": ConsoleSender,
+            "mirai": MiraiHTTPApiSender
+        }
         if self.initFlag is False:
             self.__method = str(method)
             self.__method = self.__method.lower()
         self.initFlag = True
 
     def config(self, config):
-        if self.__method == "serverchan":
-            self.__sender = ServerChanSender(config)
-        elif self.__method == "smtp":
-            self.__sender = SMTPSender(config)
-        elif self.__method == "console":
-            self.__sender = ConsoleSender(config)
-        elif self.__method == "bark":
-            self.__sender = BarkSender(config)
+        if self.__method in self.__methods:
+            self.__sender = self.__methods[self.__method](config)
         else:
             raise Exception("Configure Exception")
 
