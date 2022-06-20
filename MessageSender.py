@@ -147,4 +147,14 @@ class MiraiHTTPApiHTTPSender(object):
             self._entrypoint = config["entrypoint"]
 
     def send(self, msg: dict):
-        return requests.post(self._entrypoint, data=msg).text
+        if msg.get("send_to") == "friend":
+            return self.__send_to_friend(json.dumps(msg))
+        elif msg.get("send_to") == "group":
+            return self.__send_to_group(json.dumps(msg))
+        return None
+
+    def __send_to_group(self, msg: str):
+        return requests.post("{}/sendGroupMessage".format(self._entrypoint), data=msg).text
+
+    def __send_to_friend(self, msg: str):
+        return requests.post("{}/sendFriendMessage".format(self._entrypoint), data=msg).text
