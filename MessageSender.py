@@ -1,3 +1,4 @@
+import json
 from email.header import Header
 from email.mime.text import MIMEText
 from urllib import parse
@@ -110,3 +111,27 @@ class BarkSender(object):
         url = self.__url + self.__apiKey + "/" + parse.quote(
             msg['title']) + "/" + parse.quote(msg['content'])
         return "发送状态：" + str(requests.get(url))
+
+
+class MiraiHTTPApiSender(object):
+    _mah_friend_webhook = "localhost:9999/send"
+    _mah_group_webhook = "localhost:9999/send"
+
+    def __init__(self, config: dict):
+        if config.get("friend_webhook") is not None:
+            self._mah_friend_webhook = config["friend_webhook"]
+        if config.get("group_webhook") is not None:
+            self._mah_group_webhook = config["group_webhook"]
+
+    def send(self, msg: dict):
+        if msg.get("send_to") == "friend":
+            return self.__send_to_friend(json.dumps(msg))
+        elif msg.get("send_to") == "group":
+            return self.__send_to_group(json.dumps(msg))
+        return None
+
+    def __send_to_group(self, msg: str):
+        return requests.post(self._mah_group_webhook, data=msg).text
+
+    def __send_to_friend(self, msg: str):
+        return requests.post(self._mah_friend_webhook, data=msg).text
